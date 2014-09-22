@@ -20,7 +20,7 @@ public class IRPlayer {
 	int stereoMode;
 	int pcmMode;
 	private AudioManager audioManager;
-	
+
 	public IRPlayer(Context context) {
 		this.context = context;
 		SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(context);
@@ -30,42 +30,42 @@ public class IRPlayer {
 		audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		startVolume = audioManager.getStreamVolume(STREAM);
 	}
-	
+
 	public void stop() {	
 		stopPlaying();
 		audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, startVolume, 0);
 	}
-	
+
 	public void stopPlaying() {
 		if (track != null)
 			track.stop();
 		if (writeThread != null)
 			writeThread.interrupt();
 	}
-	
+
 	public void play(final IRCommand command) {
 		stopPlaying();
 
 		if (command.playMode == IRCommand.PLAY_STOP) {
 			return;
 		}
-		
+
 		Log.v("IRServer", "playing on carrier "+command.carrier);
-		
+
 		final IRToAudio converter = new IRToAudio(command, stereoMode, pcmMode);
 		final byte[] samples = converter.getSamples();
-		
+
 		int format = (converter.bits == 16) ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
 		int bufferSize = AudioTrack.getMinBufferSize(IRToAudio.SAMPLE_FREQ, AudioFormat.CHANNEL_CONFIGURATION_STEREO, format);
 		if (bufferSize < samples.length)
 			bufferSize = samples.length;
 		track = new AudioTrack(STREAM, IRToAudio.SAMPLE_FREQ, 
 				(converter.channels == 2) ? AudioFormat.CHANNEL_CONFIGURATION_STEREO : AudioFormat.CHANNEL_CONFIGURATION_MONO, 
-				format, 
-				bufferSize, AudioTrack.MODE_STREAM);
+						format, 
+						bufferSize, AudioTrack.MODE_STREAM);
 		track.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
 		track.play();
-		
+
 		writeThread = new Thread(new Runnable(){
 			public void run() {
 				try {
@@ -98,7 +98,7 @@ public class IRPlayer {
 					return true;
 				}
 			}});
-		
+
 		writeThread.start();		
 	}	
 }
