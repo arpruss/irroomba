@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<ListPreference
+	android:title="Stereo settings"
+	android:entries="@array/stereo_labels"    	
+	android:entryValues="@array/stereos"
+	android:key="stereo"
+	android:defaultValue="0"/>
+<ListPreference
+    android:title="Audio mode"
+    android:key="audioMode"
+    android:summary="PCM-8 reduces latency but some devices don't support it."
+    android:entries="@array/audio_mode_labels"
+    android:entryValues="@array/audio_modes"
+    android:defaultValue="0"/>
+</PreferenceScreen>
