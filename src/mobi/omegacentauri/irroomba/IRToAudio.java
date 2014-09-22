@@ -4,37 +4,37 @@ import java.util.Arrays;
 
 public class IRToAudio {
 	public int channels;
-    static final int SAMPLE_FREQ = 48000; // 44100;
-    public int bits;
-    public int samplePairByteSize; 
-    byte[] samples;
-    int samplePosition;
+	static final int SAMPLE_FREQ = 48000; // 44100;
+	public int bits;
+	public int samplePairByteSize; 
+	byte[] samples;
+	int samplePosition;
 	double phase;
 	private double phaseDelta;
 	int stereoMode;
-	
-public IRToAudio(IRCommand irCommand, int stereoMode, int bitMode) {
-	phaseDelta =  (double)(irCommand.carrier / 2) / SAMPLE_FREQ * 2 * Math.PI;
-		
+
+	public IRToAudio(IRCommand irCommand, int stereoMode, int bitMode) {
+		phaseDelta =  (double)(irCommand.carrier / 2) / SAMPLE_FREQ * 2 * Math.PI;
+
 		if (bitMode == Options.OPT_AUDIO_MODE_PCM16)
 			bits = 16;
 		else
 			bits = 8;
-		
+
 		this.stereoMode = stereoMode;
-		
+
 		if (stereoMode == Options.OPT_STEREO_SAME)
 			channels = 1;
 		else
 			channels = 2;
-		
+
 		samplePairByteSize = channels * bits / 8;
 
 		int samplePairsCount = 0;
-		
+
 		for (int i=0; i<irCommand.pulses.length; i++) 
 			samplePairsCount += beep(irCommand.pulses[i].timeInMicroSeconds, irCommand.pulses[i].on, false);
-		
+
 		if (irCommand.playMode != IRCommand.PLAY_ONCE) 
 			samplePairsCount += beep(irCommand.repeatPauseMicroseconds, false, false);
 
@@ -42,22 +42,22 @@ public IRToAudio(IRCommand irCommand, int stereoMode, int bitMode) {
 		samplePosition = 0;
 
 		phase = 0;
-		
+
 		for (int i=0; i<irCommand.pulses.length; i++) 
 			beep(irCommand.pulses[i].timeInMicroSeconds, irCommand.pulses[i].on, true);
-		
+
 		if (irCommand.playMode != IRCommand.PLAY_ONCE) 
 			beep(irCommand.repeatPauseMicroseconds, false, true);
 	}
-	
+
 	public int beep(long microsec, boolean sound, boolean play) {
 		int samplePairsCount = (int)(microsec * SAMPLE_FREQ / 1000000);
-		
+
 		if (play) {
 			if (sound) {
 				for (int t = 0 ; t < samplePairsCount ; t++) {
 					double v1 = Math.cos(phase);
-					
+
 					if (bits == 8) {
 						samples[samplePosition++] = (byte)(int)(128 + 126*v1);
 					}
@@ -66,15 +66,15 @@ public IRToAudio(IRCommand irCommand, int stereoMode, int bitMode) {
 						samples[samplePosition++] = (byte)x;
 						samples[samplePosition++] = (byte)(x>>8);							
 					}
-					
+
 					if (stereoMode != Options.OPT_STEREO_SAME) {
 						double v2;
-						
+
 						if (stereoMode == Options.OPT_STEREO_90)
 							v2 = Math.sin(phase);
 						else
 							v2 = -v1;
-						
+
 						if (bits == 8) {
 							samples[samplePosition++] = (byte)(int)(128 + 126*v2);
 						}
@@ -84,9 +84,9 @@ public IRToAudio(IRCommand irCommand, int stereoMode, int bitMode) {
 							samples[samplePosition++] = (byte)(x>>8);							
 						}
 					}
-					
+
 					phase += phaseDelta;
-					
+
 					if (phase > 2 * Math.PI) {
 						phase -= 2 * Math.PI;
 					}			
@@ -102,22 +102,22 @@ public IRToAudio(IRCommand irCommand, int stereoMode, int bitMode) {
 				phase %= 2 * Math.PI;
 			}
 		}
-		
+
 		return samplePairsCount;
 	}
 
 	public byte[] getSamples() {
-//		try {
-//			FileOutputStream w = new FileOutputStream("/sdcard/data"+BITS+".wav");
-//			w.write(samples);
-//			w.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		//		try {
+		//			FileOutputStream w = new FileOutputStream("/sdcard/data"+BITS+".wav");
+		//			w.write(samples);
+		//			w.close();
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
 		return samples;
 	}
-	
+
 	public long getSamplesTimeMicroseconds() {
 		return samples.length * (long)1000000 / ( samplePairByteSize * SAMPLE_FREQ );
 	}
