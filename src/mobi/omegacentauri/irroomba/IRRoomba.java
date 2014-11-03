@@ -35,6 +35,7 @@ public class IRRoomba extends Activity {
 		register(R.id.spot, "time=500000:roomba:132");
 		register(R.id.max, "time=500000:roomba:133");
 		register(R.id.power, "time=1000000:roomba:138");
+		register(R.id.dock, "time=500000:roomba:143");
 	}
 
 	private void register(int id, final String cmd) {

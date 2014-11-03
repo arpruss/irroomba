@@ -74,11 +74,12 @@
             android:layout_weight="1"
             android:text="Left 1sec." />
 
-        <LinearLayout
+        <Button
+            android:id="@+id/dock"
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            />
+            android:text="Dock" />
 
         <Button
             android:id="@+id/right_1sec"
